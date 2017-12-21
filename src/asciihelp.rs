@@ -60,9 +60,11 @@ static ASCII_CHARACTER_CLASS: [AsciiCharacterClass; 128] = [
 /// ```
 pub fn is_ascii_graphic(c: u8) -> bool {
     let c = c as usize;
-    if c >= 0x80 { return false; }
+    if c >= 0x80 {
+        return false;
+    }
     match ASCII_CHARACTER_CLASS[c] {
-        Ux|U|Lx|L|D|P => true,
-        _ => false
+        Ux | U | Lx | L | D | P => true,
+        _ => false,
     }
 }

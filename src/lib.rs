@@ -1,5 +1,5 @@
-#![deny(missing_docs, missing_copy_implementations, trivial_casts, trivial_numeric_casts,
-unsafe_code, unused_import_braces, unused_qualifications)]
+#![deny(missing_docs, missing_copy_implementations, trivial_casts, trivial_numeric_casts, unsafe_code,
+        unused_import_braces, unused_qualifications)]
 
 //! A simple `HexView` for [cursive](https://crates.io/crates/cursive).
 //!
@@ -21,7 +21,6 @@ unsafe_code, unused_import_braces, unused_qualifications)]
 //! | <kbd>-</kbd>                        | Decrease the amount of data by one. Any data that will leave the viewable area, will be permanantly lost.                                                                                                                                              |
 //! | <kbd>0-9</kbd>, <kbd>a-f</kbd>      | Set the nibble under the cursor to the corresponding hex value. Note, that this is only available in the editable state, see [`DisplayState`](enum.DisplayState.html#Editable) and [`set_display_state`](struct.HexView.html#method.set_display_state) |
 
-
 extern crate cursive;
 extern crate itertools;
 
@@ -38,8 +37,13 @@ use cursive::view::View;
 use cursive::vec::Vec2;
 use itertools::Itertools;
 
-/// This enum is used for the [`set_display_state`](struct.HexView.html#method.set_display_state) method
+/// Controls the possible interactions with a [HexView].
+///
+/// This enum is used for the [`set_display_state`] method
 /// and controls the interaction inside of the cursive environment.
+///
+/// [HexView]: struct.HexView.html
+/// [`set_display_state`]: struct.HexView.html#method.set_display_state
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum DisplayState {
     /// The view can neither be focused, nor edited
@@ -50,10 +54,13 @@ pub enum DisplayState {
     Editable,
 }
 
-
+/// Hexadecimal viewer.
+///
 /// This is a classic hexview which can be used to view and manipulate data which resides inside
-/// this struct. There are severeal states in which the view can be operatered, see [`DisplayState`](enum.DisplayState.html).
+/// this struct. There are severeal states in which the view can be operatered, see [`DisplayState`].
 /// You should consider the corresponding method docs for each state.
+///
+/// [`DisplayState`]: enum.DisplayState.html
 ///
 /// # Examples
 ///
@@ -95,12 +102,8 @@ impl HexView {
     /// # use cursive_hexview::HexView;
     /// let view = HexView::new();
     /// ```
-    pub fn new() -> HexView {
-        HexView {
-            cursor: (0, 0).into(),
-            data: Vec::new(),
-            state: DisplayState::Disabled,
-        }
+    pub fn new() -> Self {
+        Self::new_from_iter(Vec::<u8>::new())
     }
 
     /// Crates a new `HexView` with the given data and disabled state.
@@ -127,9 +130,9 @@ impl HexView {
     /// # use cursive_hexview::HexView;
     /// let view = HexView::new_from_iter(&[5, 6, 2, 89]);
     /// ```
-    pub fn new_from_iter<B: Borrow<u8>, I: IntoIterator<Item=B>>(data: I) -> HexView {
+    pub fn new_from_iter<B: Borrow<u8>, I: IntoIterator<Item = B>>(data: I) -> Self {
         HexView {
-            cursor: (0, 0).into(),
+            cursor: Vec2::zero(),
             data: data.into_iter().map(|u| *u.borrow()).collect(),
             state: DisplayState::Disabled,
         }
@@ -150,15 +153,16 @@ impl HexView {
         &self.data
     }
 
-    /// This methods lets set you data during the lifetime of this instance (e.g. the data has been
-    /// updated due to an external event).
+    /// Sets the data during the lifetime of this instance.
+    ///
+    /// For insance to update the data due to an external event.
     ///
     /// ```
     /// # use cursive_hexview::HexView;
     /// let mut view = cursive_hexview::HexView::new();
     /// view.set_data(b"Hello, World!".to_owned().iter());
     /// ```
-    pub fn set_data<B: Borrow<u8>, I: IntoIterator<Item=B>>(&mut self, data: I) {
+    pub fn set_data<B: Borrow<u8>, I: IntoIterator<Item = B>>(&mut self, data: I) {
         self.data = data.into_iter().map(|u| *u.borrow()).collect();
     }
 
@@ -167,8 +171,9 @@ impl HexView {
         self.with(|s| s.set_display_state(state))
     }
 
-    /// Sets the state of the view to one of the variants from `DisplayState`. This will alter the
-    /// behavoir of the view accrodingly to the set state.
+    /// Sets the state of the view to one of the variants from `DisplayState`.
+    ///
+    /// This will alter the behavior of the view accrodingly to the set state.
     ///
     /// If the state is set to `Disabled` this view can neither be focused nor edited. If the state
     /// is set to `Enabled` it can be focused and the cursor can be moved around, but no data can
@@ -191,15 +196,15 @@ impl HexView {
     }
 
     /// Returns the length of the data.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// # use cursive_hexview::HexView;
     /// let view = HexView::new_from_iter(vec![0, 1, 2, 3]);
     /// assert_eq!(4, view.len());
     /// ```
-    /// 
+    ///
     pub fn len(&self) -> usize {
         self.data.len()
     }
@@ -225,6 +230,7 @@ impl HexView {
     }
 
     /// Sets the length of the data which this view displays.
+    ///
     /// If the new length is greater than the current one, 0's will be appended to the data.
     /// If the new length is less than the current one, the data will be truncated and is lost.
     ///
@@ -234,7 +240,7 @@ impl HexView {
     /// # use cursive_hexview::HexView;
     /// let mut view = HexView::new();
     /// view.set_len(3);
-    /// 
+    ///
     /// assert_eq!(view.len(), 3);
     /// assert_eq!(view.data(), &vec![0u8, 0u8, 0u8]);
     /// ```
@@ -250,7 +256,6 @@ impl HexView {
         }
     }
 }
-
 
 enum Field {
     Addr,
@@ -270,12 +275,18 @@ const HEX_ASCII_SEPERATOR: &str = " │ ";
 
 /// calcs the position in a line with spacing
 fn get_cursor_offset(vec: Vec2) -> Vec2 {
-    (((vec.x as f32 / CHARS_PER_GROUP as f32).floor() as usize) * CHARS_PER_SPACING, 0).into()
+    (
+        ((vec.x as f32 / CHARS_PER_GROUP as f32).floor() as usize) * CHARS_PER_SPACING,
+        0,
+    ).into()
 }
 
 /// returns the number of elements in `row` for a given `datalen` with `elements_per_line`
 fn get_elements_in_row(datalen: usize, row: usize, elements_per_line: usize) -> usize {
-    min(datalen.saturating_sub(elements_per_line * row), elements_per_line)
+    min(
+        datalen.saturating_sub(elements_per_line * row),
+        elements_per_line,
+    )
 }
 
 /// returns the maximal cursor position in a `row` for a `datalen` and `elements_per_line`
@@ -296,11 +307,12 @@ fn make_printable<T: Borrow<u8>>(c: T) -> char {
 // implements helper functions for this struct
 impl HexView {
     /// Counts how many digits we need to align the addresses evenly.
+    ///
     /// E.g. we need 2 digits for 20 elements (0x14), but only 1 for 10 elements (0xA)
     fn get_addr_digit_length(&self) -> usize {
         match self.data.len() {
-            0 ... 1 => 1,
-            e => (e as f64).log(16.0).ceil() as usize
+            0...1 => 1,
+            e => (e as f64).log(16.0).ceil() as usize,
         }
     }
 
@@ -308,11 +320,12 @@ impl HexView {
     fn get_widget_height(&self) -> usize {
         match self.data.len() {
             0 => 1,
-            e => (e as f64 / 16.0).ceil() as usize
+            e => (e as f64 / 16.0).ceil() as usize,
         }
     }
 
-    /// calcs the offset to the current position to match the spacing we insert to group the hex chars,
+    /// calcs the offset to the current position to match the spacing we insert to group the hex chars.
+    ///
     /// e.g. cursor (5, 0) will result in (6, 0) because of the 1 space spacing after the fourth char
     /// and cursor (9, 0) will result in (11, 0) because of the 1+1 spacing after the fourth and eighth char
     fn get_cursor_offset(&self) -> Vec2 {
@@ -329,7 +342,9 @@ impl HexView {
         get_max_x_in_row(self.data.len(), self.cursor.y, U8S_PER_LINE)
     }
 
-    /// advances the x position by one and returns either an `EventResult::Ignored` if the end of
+    /// advances the x position by one
+    ///
+    /// Returns either an `EventResult::Ignored` if the end of
     /// the line is reached or `EventResult::Consumed(None)` if it was successful.
     fn cursor_x_advance(&mut self) -> EventResult {
         let max_pos = self.get_max_x_in_current_row();
@@ -341,8 +356,12 @@ impl HexView {
         EventResult::Consumed(None)
     }
 
-    /// Gets the element under the cursor (which points to a nibble, but we are interested in the
-    /// whole u8), none if the cursor is out of range.
+    /// Gets the element under the cursor
+    ///
+    /// (which points to a nibble, but we are interested in the
+    /// whole u8)
+    ///
+    /// Returns none if the cursor is out of range.
     fn get_element_under_cursor(&self) -> Option<u8> {
         let elem = self.cursor.y * U8S_PER_LINE + self.cursor.x / 2;
         if let Some(d) = self.data.get(elem) {
@@ -352,7 +371,9 @@ impl HexView {
         }
     }
 
-    /// Converts the visual position to a non spaced one. This function is used to convert the
+    /// Converts the visual position to a non spaced one.
+    ///
+    /// This function is used to convert the
     /// point where the mouse clicked to the real cursor position without padding
     fn convert_visual_to_real_cursor(&self, pos: Vec2) -> Vec2 {
         let mut res = pos;
@@ -361,7 +382,10 @@ impl HexView {
         res.y = min(self.get_widget_height() - 1, pos.y);
         res.x = res.x.saturating_sub(hex_offset);
         res.x = res.x.saturating_sub(get_cursor_offset(res).x);
-        res.x = min(get_max_x_in_row(self.data.len(), res.y, U8S_PER_LINE), res.x);
+        res.x = min(
+            get_max_x_in_row(self.data.len(), res.y, U8S_PER_LINE),
+            res.x,
+        );
 
         res
     }
@@ -379,19 +403,22 @@ impl HexView {
     }
 }
 
-/// implements draw-helper functions
-/// it will look as follows
-/// addr: hexehex hexhex hexhex ... | asciiiiiii
-/// the addr field will be padded, so that all addresses are equal in length
-/// the hex field will be grouped by 4 character (nibble) and seperated by 1 space
-/// the seperator is a special pipe, which is longer and connects with the lower and bottom "pipe" (BOX DRAWINGS LIGHT VERTICAL \u{2502})
-/// the ascii part is just the ascii char of the coressponding hex value if it is graphical (see asciihelp), if not it will be displayed as a dot (.)
+// implements draw-helper functions
+// it will look as follows
+// addr: hexehex hexhex hexhex ... | asciiiiiii
+// the addr field will be padded, so that all addresses are equal in length
+// the hex field will be grouped by 4 character (nibble) and seperated by 1 space
+// the seperator is a special pipe, which is longer and connects with the lower and bottom "pipe" (BOX DRAWINGS LIGHT VERTICAL \u{2502})
+// the ascii part is just the ascii char of the coressponding hex value if it is graphical (see asciihelp), if not it will be displayed as a dot (.)
 impl HexView {
     /// draws the addr field into the printer
     fn draw_addr(&self, printer: &Printer) {
         let digits_len = self.get_addr_digit_length();
         for lines in 0..self.get_widget_height() {
-            printer.print((0, lines), &format!("{:0len$X}", lines * U8S_PER_LINE, len = digits_len));
+            printer.print(
+                (0, lines),
+                &format!("{:0len$X}", lines * U8S_PER_LINE, len = digits_len),
+            );
         }
     }
 
@@ -402,7 +429,15 @@ impl HexView {
     /// draws the hex fields between the addr and ascii representation
     fn draw_hex(&self, printer: &Printer) {
         for (i, c) in self.data.chunks(U8S_PER_LINE).enumerate() {
-            let hex = c.chunks(2).map(|c| if c.len() == 2 { format!("{:02X}{:02X}", c[0], c[1]) } else { format!("{:02X}", c[0]) }).format(" ");
+            let hex = c.chunks(2)
+                .map(|c| {
+                    if c.len() == 2 {
+                        format!("{:02X}{:02X}", c[0], c[1])
+                    } else {
+                        format!("{:02X}", c[0])
+                    }
+                })
+                .format(" ");
             printer.print((0, i), &format!("{}", hex));
         }
     }
@@ -432,7 +467,9 @@ impl HexView {
             let ext = |hl| if hl { s.0 } else { s.1 };
 
             printer.with_color(ColorStyle::Highlight, |p| p.print(hpos, ext(high)));
-            printer.with_color(ColorStyle::Secondary, |p| p.with_effect(Effect::Reverse, |p| p.print(dpos, ext(!high))));
+            printer.with_color(ColorStyle::Secondary, |p| {
+                p.with_effect(Effect::Reverse, |p| p.print(dpos, ext(!high)))
+            });
         }
     }
 
@@ -476,15 +513,25 @@ impl View for HexView {
                     } else {
                         let max_pos = min(self.data.len(), self.cursor.y / 2 + 16).saturating_sub(1);
                         self.cursor.y = min(self.cursor.y + 1, max_pos);
-                        self.cursor.x = min(self.cursor.x, self.get_elements_in_current_row().saturating_sub(1) * 2);
+                        self.cursor.x = min(
+                            self.cursor.x,
+                            self.get_elements_in_current_row().saturating_sub(1) * 2,
+                        );
                     }
                 }
                 Key::Home => self.cursor.x = 0,
                 Key::End => self.cursor.x = self.get_max_x_in_current_row(),
-                _ => { return EventResult::Ignored; }
-            }
+                _ => {
+                    return EventResult::Ignored;
+                }
+            },
             Event::Shift(Key::Home) => self.cursor = (0, 0).into(),
-            Event::Shift(Key::End) => self.cursor = (get_max_x_in_row(self.data.len(), self.get_widget_height() - 1, 16), self.get_widget_height() - 1).into(),
+            Event::Shift(Key::End) => {
+                self.cursor = (
+                    get_max_x_in_row(self.data.len(), self.get_widget_height() - 1, 16),
+                    self.get_widget_height() - 1,
+                ).into()
+            }
 
             //edit keys
             Event::Char(c) => {
@@ -518,30 +565,34 @@ impl View for HexView {
                     }
                 }
             }
-            Event::Mouse { offset, position, event } => {
-                match event {
-                    MouseEvent::Press(_) => {
-                        if offset.fits_in(position) {
-                            self.cursor = self.convert_visual_to_real_cursor(position - offset);
-                        } else {
-                            return EventResult::Ignored;
-                        }
+            Event::Mouse {
+                offset,
+                position,
+                event,
+            } => match event {
+                MouseEvent::Press(_) => {
+                    if let Some(position) = position.checked_sub(offset) {
+                        self.cursor = self.convert_visual_to_real_cursor(position);
+                    } else {
+                        return EventResult::Ignored;
                     }
-                    _ => { return EventResult::Ignored; }
                 }
+                _ => {
+                    return EventResult::Ignored;
+                }
+            },
+            _ => {
+                return EventResult::Ignored;
             }
-            _ => { return EventResult::Ignored; }
         };
 
         EventResult::Consumed(None)
     }
 
     fn required_size(&mut self, _: Vec2) -> Vec2 {
-        let length = self.get_field_length(Field::Addr) +
-            self.get_field_length(Field::AddrSep) +
-            self.get_field_length(Field::Hex) +
-            self.get_field_length(Field::AsciiSep) +
-            self.get_field_length(Field::Ascii);
+        let length = self.get_field_length(Field::Addr) + self.get_field_length(Field::AddrSep)
+            + self.get_field_length(Field::Hex) + self.get_field_length(Field::AsciiSep)
+            + self.get_field_length(Field::Ascii);
 
         (length, self.get_widget_height()).into()
     }
@@ -553,7 +604,10 @@ impl View for HexView {
         let addr_sep = (addr.0 + addr.1, self.get_field_length(Field::AddrSep));
         let hex = (addr_sep.0 + addr_sep.1, self.get_field_length(Field::Hex));
         let ascii_sep = (hex.0 + hex.1, self.get_field_length(Field::AsciiSep));
-        let ascii = (ascii_sep.0 + ascii_sep.1, self.get_field_length(Field::Ascii));
+        let ascii = (
+            ascii_sep.0 + ascii_sep.1,
+            self.get_field_length(Field::Ascii),
+        );
 
         self.draw_addr(&printer.sub_printer((addr.0, 0), (addr.1, height), false));
         self.draw_addr_hex_sep(&printer.sub_printer((addr_sep.0, 0), (addr_sep.1, height), false));
@@ -572,7 +626,5 @@ impl View for HexView {
     }
 }
 
-
 //TODO: needs_relayout: only when cursor moved or data has been updated (either internally or externally)
 //      required_size:  support different views (e.g. wihtout ascii, without addr, hex only)
-
