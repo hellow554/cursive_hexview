@@ -18,3 +18,6 @@ ncurses-backend = ["cursive/ncurses-backend"]
 pancurses-backend = ["cursive/pancurses-backend"]
 termion-backend = ["cursive/termion-backend"]
 blt-backend = ["cursive/blt-backend"]
+
+[badges.travis-ci]
+repository="hellow554/cursive_hexview"
