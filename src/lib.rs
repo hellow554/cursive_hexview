@@ -102,12 +102,8 @@ impl HexView {
     /// # use cursive_hexview::HexView;
     /// let view = HexView::new();
     /// ```
-    pub fn new() -> HexView {
-        HexView {
-            cursor: (0, 0).into(),
-            data: Vec::new(),
-            state: DisplayState::Disabled,
-        }
+    pub fn new() -> Self {
+        Self::new_from_iter(Vec::<u8>::new())
     }
 
     /// Crates a new `HexView` with the given data and disabled state.
@@ -134,9 +130,9 @@ impl HexView {
     /// # use cursive_hexview::HexView;
     /// let view = HexView::new_from_iter(&[5, 6, 2, 89]);
     /// ```
-    pub fn new_from_iter<B: Borrow<u8>, I: IntoIterator<Item = B>>(data: I) -> HexView {
+    pub fn new_from_iter<B: Borrow<u8>, I: IntoIterator<Item = B>>(data: I) -> Self {
         HexView {
-            cursor: (0, 0).into(),
+            cursor: Vec2::zero(),
             data: data.into_iter().map(|u| *u.borrow()).collect(),
             state: DisplayState::Disabled,
         }
