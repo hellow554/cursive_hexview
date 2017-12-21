@@ -518,14 +518,16 @@ impl View for HexView {
                     }
                 }
             }
-            Event::Mouse { offset, position, event } => {
-                match event {
-                    MouseEvent::Press(_) => {
-                        if offset.fits_in(position) {
-                            self.cursor = self.convert_visual_to_real_cursor(position - offset);
-                        } else {
-                            return EventResult::Ignored;
-                        }
+            Event::Mouse {
+                offset,
+                position,
+                event,
+            } => match event {
+                MouseEvent::Press(_) => {
+                    if let Some(position) = position.checked_sub(offset) {
+                        self.cursor = self.convert_visual_to_real_cursor(position);
+                    } else {
+                        return EventResult::Ignored;
                     }
                     _ => { return EventResult::Ignored; }
                 }
