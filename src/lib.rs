@@ -37,8 +37,13 @@ use cursive::view::View;
 use cursive::vec::Vec2;
 use itertools::Itertools;
 
-/// This enum is used for the [`set_display_state`](struct.HexView.html#method.set_display_state) method
+/// Controls the possible interactions with a [HexView].
+///
+/// This enum is used for the [`set_display_state`] method
 /// and controls the interaction inside of the cursive environment.
+///
+/// [HexView]: struct.HexView.html
+/// [`set_display_state`]: struct.HexView.html#method.set_display_state
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum DisplayState {
     /// The view can neither be focused, nor edited
@@ -49,9 +54,13 @@ pub enum DisplayState {
     Editable,
 }
 
+/// Hexadecimal viewer.
+///
 /// This is a classic hexview which can be used to view and manipulate data which resides inside
-/// this struct. There are severeal states in which the view can be operatered, see [`DisplayState`](enum.DisplayState.html).
+/// this struct. There are severeal states in which the view can be operatered, see [`DisplayState`].
 /// You should consider the corresponding method docs for each state.
+///
+/// [`DisplayState`]: enum.DisplayState.html
 ///
 /// # Examples
 ///
@@ -148,8 +157,9 @@ impl HexView {
         &self.data
     }
 
-    /// This methods lets set you data during the lifetime of this instance (e.g. the data has been
-    /// updated due to an external event).
+    /// Sets the data during the lifetime of this instance.
+    ///
+    /// For insance to update the data due to an external event.
     ///
     /// ```
     /// # use cursive_hexview::HexView;
@@ -165,8 +175,9 @@ impl HexView {
         self.with(|s| s.set_display_state(state))
     }
 
-    /// Sets the state of the view to one of the variants from `DisplayState`. This will alter the
-    /// behavoir of the view accrodingly to the set state.
+    /// Sets the state of the view to one of the variants from `DisplayState`.
+    ///
+    /// This will alter the behavior of the view accrodingly to the set state.
     ///
     /// If the state is set to `Disabled` this view can neither be focused nor edited. If the state
     /// is set to `Enabled` it can be focused and the cursor can be moved around, but no data can
@@ -223,6 +234,7 @@ impl HexView {
     }
 
     /// Sets the length of the data which this view displays.
+    ///
     /// If the new length is greater than the current one, 0's will be appended to the data.
     /// If the new length is less than the current one, the data will be truncated and is lost.
     ///
@@ -299,6 +311,7 @@ fn make_printable<T: Borrow<u8>>(c: T) -> char {
 // implements helper functions for this struct
 impl HexView {
     /// Counts how many digits we need to align the addresses evenly.
+    ///
     /// E.g. we need 2 digits for 20 elements (0x14), but only 1 for 10 elements (0xA)
     fn get_addr_digit_length(&self) -> usize {
         match self.data.len() {
@@ -315,7 +328,8 @@ impl HexView {
         }
     }
 
-    /// calcs the offset to the current position to match the spacing we insert to group the hex chars,
+    /// calcs the offset to the current position to match the spacing we insert to group the hex chars.
+    ///
     /// e.g. cursor (5, 0) will result in (6, 0) because of the 1 space spacing after the fourth char
     /// and cursor (9, 0) will result in (11, 0) because of the 1+1 spacing after the fourth and eighth char
     fn get_cursor_offset(&self) -> Vec2 {
@@ -332,7 +346,9 @@ impl HexView {
         get_max_x_in_row(self.data.len(), self.cursor.y, U8S_PER_LINE)
     }
 
-    /// advances the x position by one and returns either an `EventResult::Ignored` if the end of
+    /// advances the x position by one
+    ///
+    /// Returns either an `EventResult::Ignored` if the end of
     /// the line is reached or `EventResult::Consumed(None)` if it was successful.
     fn cursor_x_advance(&mut self) -> EventResult {
         let max_pos = self.get_max_x_in_current_row();
@@ -344,8 +360,12 @@ impl HexView {
         EventResult::Consumed(None)
     }
 
-    /// Gets the element under the cursor (which points to a nibble, but we are interested in the
-    /// whole u8), none if the cursor is out of range.
+    /// Gets the element under the cursor
+    ///
+    /// (which points to a nibble, but we are interested in the
+    /// whole u8)
+    ///
+    /// Returns none if the cursor is out of range.
     fn get_element_under_cursor(&self) -> Option<u8> {
         let elem = self.cursor.y * U8S_PER_LINE + self.cursor.x / 2;
         if let Some(d) = self.data.get(elem) {
@@ -355,7 +375,9 @@ impl HexView {
         }
     }
 
-    /// Converts the visual position to a non spaced one. This function is used to convert the
+    /// Converts the visual position to a non spaced one.
+    ///
+    /// This function is used to convert the
     /// point where the mouse clicked to the real cursor position without padding
     fn convert_visual_to_real_cursor(&self, pos: Vec2) -> Vec2 {
         let mut res = pos;
@@ -385,13 +407,13 @@ impl HexView {
     }
 }
 
-/// implements draw-helper functions
-/// it will look as follows
-/// addr: hexehex hexhex hexhex ... | asciiiiiii
-/// the addr field will be padded, so that all addresses are equal in length
-/// the hex field will be grouped by 4 character (nibble) and seperated by 1 space
-/// the seperator is a special pipe, which is longer and connects with the lower and bottom "pipe" (BOX DRAWINGS LIGHT VERTICAL \u{2502})
-/// the ascii part is just the ascii char of the coressponding hex value if it is graphical (see asciihelp), if not it will be displayed as a dot (.)
+// implements draw-helper functions
+// it will look as follows
+// addr: hexehex hexhex hexhex ... | asciiiiiii
+// the addr field will be padded, so that all addresses are equal in length
+// the hex field will be grouped by 4 character (nibble) and seperated by 1 space
+// the seperator is a special pipe, which is longer and connects with the lower and bottom "pipe" (BOX DRAWINGS LIGHT VERTICAL \u{2502})
+// the ascii part is just the ascii char of the coressponding hex value if it is graphical (see asciihelp), if not it will be displayed as a dot (.)
 impl HexView {
     /// draws the addr field into the printer
     fn draw_addr(&self, printer: &Printer) {
