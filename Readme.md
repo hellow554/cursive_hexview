@@ -26,7 +26,7 @@ extern crate cursive_hexview;
 
 For a minimal example see `examples` folder.
 
-
+![hexdump_example](doc/hexdump_example.png)
 
 
 [0]: https://crates.io/crates/cursive
