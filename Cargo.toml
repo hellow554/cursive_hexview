@@ -1,0 +1,20 @@
+[package]
+name = "cursive_hexview"
+version = "0.1.1"
+authors = ["Marcel Hellwig <git@cookiesoft.de>"]
+description = "A simple hexviewer for cursive"
+repository = "https://github.com/hellow554/cursive_hexview.git"
+readme = "README.md"
+keywords = ["cursive", "hexview"]
+license = "MIT"
+
+[dependencies]
+cursive = { version = "0.7", default-features = false }
+itertools = "0.7"
+
+[features]
+default = ["ncurses-backend"]
+ncurses-backend = ["cursive/ncurses-backend"]
+pancurses-backend = ["cursive/pancurses-backend"]
+termion-backend = ["cursive/termion-backend"]
+blt-backend = ["cursive/blt-backend"]
