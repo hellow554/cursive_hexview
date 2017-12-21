@@ -36,7 +36,6 @@ use cursive::direction::Direction;
 use cursive::event::{Event, EventResult, Key, MouseEvent};
 use cursive::view::View;
 use cursive::vec::Vec2;
-use cursive::traits::*;
 use itertools::Itertools;
 
 /// This enum is used for the [`set_display_state`](struct.HexView.html#method.set_display_state) method
