@@ -7,4 +7,7 @@ matrix:
   allow_failures:
     - rust: nightly
 
+script:
+  - cargo build --verbose --all
+
 cache: cargo
