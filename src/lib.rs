@@ -1,5 +1,5 @@
-#![deny(missing_docs, missing_copy_implementations, trivial_casts, trivial_numeric_casts,
-        unsafe_code, unused_import_braces, unused_qualifications)]
+#![deny(missing_docs, missing_copy_implementations, trivial_casts, trivial_numeric_casts, unsafe_code,
+        unused_import_braces, unused_qualifications)]
 
 //! A simple `HexView` for [cursive](https://crates.io/crates/cursive).
 //!
@@ -464,8 +464,7 @@ impl HexView {
 
             let fem = format!("{:02X}", elem);
             let s = fem.split_at(1);
-            let ext =
-                |hl| if hl { s.0 } else { s.1 };
+            let ext = |hl| if hl { s.0 } else { s.1 };
 
             printer.with_color(ColorStyle::Highlight, |p| p.print(hpos, ext(high)));
             printer.with_color(ColorStyle::Secondary, |p| {
@@ -512,8 +511,7 @@ impl View for HexView {
                     if self.cursor.y == self.get_widget_height().saturating_sub(1) {
                         return EventResult::Ignored;
                     } else {
-                        let max_pos =
-                            min(self.data.len(), self.cursor.y / 2 + 16).saturating_sub(1);
+                        let max_pos = min(self.data.len(), self.cursor.y / 2 + 16).saturating_sub(1);
                         self.cursor.y = min(self.cursor.y + 1, max_pos);
                         self.cursor.x = min(
                             self.cursor.x,
@@ -558,8 +556,7 @@ impl View for HexView {
                                 let high = self.cursor.x % 2 == 0;
                                 let mask = 0xF << if high { 4 } else { 0 };
 
-                                self.data[elem] =
-                                    (dat & !mask) | ((val as u8) << if high { 4 } else { 0 });
+                                self.data[elem] = (dat & !mask) | ((val as u8) << if high { 4 } else { 0 });
                                 self.cursor_x_advance();
                             }
                         } else {
@@ -594,8 +591,7 @@ impl View for HexView {
 
     fn required_size(&mut self, _: Vec2) -> Vec2 {
         let length = self.get_field_length(Field::Addr) + self.get_field_length(Field::AddrSep)
-            + self.get_field_length(Field::Hex)
-            + self.get_field_length(Field::AsciiSep)
+            + self.get_field_length(Field::Hex) + self.get_field_length(Field::AsciiSep)
             + self.get_field_length(Field::Ascii);
 
         (length, self.get_widget_height()).into()
@@ -621,11 +617,7 @@ impl View for HexView {
 
         if self.state != DisplayState::Disabled {
             self.highlight_current_hex(&printer.sub_printer((hex.0, 0), (hex.1, height), true));
-            self.highlight_current_ascii(&printer.sub_printer(
-                (ascii.0, 0),
-                (ascii.1, height),
-                true,
-            ));
+            self.highlight_current_ascii(&printer.sub_printer((ascii.0, 0), (ascii.1, height), true));
         }
     }
 
