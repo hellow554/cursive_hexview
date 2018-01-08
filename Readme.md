@@ -7,6 +7,11 @@ Cursive-Hexview
 A simple and basic hexviewer which can be used with [cursive][0].
 
 
+Documentation
+-------------
+
+Can be found on [docs.rs](https://docs.rs/cursive_hexview)
+
 Usage
 -----
 
