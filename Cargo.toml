@@ -4,7 +4,7 @@ version = "0.1.1"
 authors = ["Marcel Hellwig <git@cookiesoft.de>"]
 description = "A simple hexviewer for cursive"
 repository = "https://github.com/hellow554/cursive_hexview.git"
-readme = "README.md"
+readme = "Readme.md"
 keywords = ["cursive", "hexview"]
 license = "MIT"
 
