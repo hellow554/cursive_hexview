@@ -466,8 +466,8 @@ impl HexView {
             let s = fem.split_at(1);
             let ext = |hl| if hl { s.0 } else { s.1 };
 
-            printer.with_color(ColorStyle::Highlight, |p| p.print(hpos, ext(high)));
-            printer.with_color(ColorStyle::Secondary, |p| {
+            printer.with_color(ColorStyle::highlight(), |p| p.print(hpos, ext(high)));
+            printer.with_color(ColorStyle::secondary(), |p| {
                 p.with_effect(Effect::Reverse, |p| p.print(dpos, ext(!high)))
             });
         }
@@ -478,7 +478,7 @@ impl HexView {
         if let Some(elem) = self.get_element_under_cursor() {
             let pos = self.cursor.map_x(|x| x / 2);
             let ascii = make_printable(&elem);
-            printer.with_color(ColorStyle::Highlight, |p| p.print(pos, &ascii.to_string()));
+            printer.with_color(ColorStyle::highlight(), |p| p.print(pos, &ascii.to_string()));
         }
     }
 }
