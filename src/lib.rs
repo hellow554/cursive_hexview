@@ -295,7 +295,7 @@ fn get_max_x_in_row(datalen: usize, row: usize, elements_per_line: usize) -> usi
 /// converts the character either to itself if it `is_ascii_graphic`
 fn make_printable<T: Borrow<u8>>(c: T) -> char {
     let c = *c.borrow();
-    if c.is_ascii_graphic {
+    if c.is_ascii_graphic() {
         c as char
     } else {
         '.'
