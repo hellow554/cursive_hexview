@@ -24,8 +24,6 @@
 extern crate cursive;
 extern crate itertools;
 
-mod asciihelp;
-
 use std::borrow::Borrow;
 use std::cmp::min;
 
@@ -297,7 +295,7 @@ fn get_max_x_in_row(datalen: usize, row: usize, elements_per_line: usize) -> usi
 /// converts the character either to itself if it `is_ascii_graphic`
 fn make_printable<T: Borrow<u8>>(c: T) -> char {
     let c = *c.borrow();
-    if asciihelp::is_ascii_graphic(c) {
+    if c.is_ascii_graphic {
         c as char
     } else {
         '.'
@@ -409,7 +407,7 @@ impl HexView {
 // the addr field will be padded, so that all addresses are equal in length
 // the hex field will be grouped by 4 character (nibble) and seperated by 1 space
 // the seperator is a special pipe, which is longer and connects with the lower and bottom "pipe" (BOX DRAWINGS LIGHT VERTICAL \u{2502})
-// the ascii part is just the ascii char of the coressponding hex value if it is graphical (see asciihelp), if not it will be displayed as a dot (.)
+// the ascii part is just the ascii char of the coressponding hex value if it is [graphical](https://doc.rust-lang.org/std/primitive.u8.html#method.is_ascii_graphic), if not it will be displayed as a dot (.)
 impl HexView {
     /// draws the addr field into the printer
     fn draw_addr(&self, printer: &Printer) {
