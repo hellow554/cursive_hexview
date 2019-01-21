@@ -20,7 +20,7 @@ fn main() {
     let arg = env::args().nth(1).expect("Please provide the file to read from as first argument");
     let path = Path::new(&arg);
 
-    let mut cur = Cursive::new();
+    let mut cur = Cursive::ncurses();
     let explanation = TextView::new("Use the keys ↑ ↓ ← → to navigate around.\nUse q to exit.");
     let view = HexView::new_from_iter(read_file(path).expect("Cannot read file")).display_state(DisplayState::Enabled);
 

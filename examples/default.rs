@@ -6,7 +6,7 @@ use cursive::Cursive;
 use cursive::views::{Dialog, DummyView, LinearLayout, TextView};
 
 fn main() {
-    let mut cur = Cursive::new();
+    let mut cur = Cursive::ncurses();
     let explanation =
         TextView::new("Use the keys + - ↑ ↓ ← → 0-9 a-f for the HexView.\nUse q to exit.");
     let view = HexView::new().display_state(DisplayState::Editable);

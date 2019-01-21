@@ -70,7 +70,7 @@ pub enum DisplayState {
 ///
 /// fn main() {
 ///     let view = HexView::new().display_state(DisplayState::Editable);
-///     let mut cur = cursive::Cursive::new();
+///     let mut cur = cursive::Cursive::dummy();
 ///
 ///     cur.add_layer(cursive::views::Dialog::around(view).title("HexView"));
 ///
@@ -607,15 +607,15 @@ impl View for HexView {
             self.get_field_length(Field::Ascii),
         );
 
-        self.draw_addr(&printer.sub_printer((addr.0, 0), (addr.1, height), false));
-        self.draw_addr_hex_sep(&printer.sub_printer((addr_sep.0, 0), (addr_sep.1, height), false));
-        self.draw_hex(&printer.sub_printer((hex.0, 0), (hex.1, height), false));
-        self.draw_ascii_sep(&printer.sub_printer((ascii_sep.0, 0), (ascii_sep.1, height), false));
-        self.draw_ascii(&printer.sub_printer((ascii.0, 0), (ascii.1, height), false));
+        self.draw_addr(&printer.offset((addr.0, 0)).cropped((addr.1, height)));
+        self.draw_addr_hex_sep(&printer.offset((addr_sep.0, 0)).cropped((addr_sep.1, height)));
+        self.draw_hex(&printer.offset((hex.0, 0)).cropped((hex.1, height)));
+        self.draw_ascii_sep(&printer.offset((ascii_sep.0, 0)).cropped((ascii_sep.1, height)));
+        self.draw_ascii(&printer.offset((ascii.0, 0)).cropped((ascii.1, height)));
 
         if self.state != DisplayState::Disabled {
-            self.highlight_current_hex(&printer.sub_printer((hex.0, 0), (hex.1, height), true));
-            self.highlight_current_ascii(&printer.sub_printer((ascii.0, 0), (ascii.1, height), true));
+            self.highlight_current_hex(&printer.offset((hex.0, 0)).cropped((hex.1, height)).focused(true));
+            self.highlight_current_ascii(&printer.offset((ascii.0, 0)).cropped((ascii.1, height)).focused(true));
         }
     }
 
