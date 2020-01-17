@@ -9,15 +9,11 @@ keywords = ["cursive", "hexview"]
 license = "MIT"
 
 [dependencies]
-cursive = { version = "0.9", default-features = false }
+cursive = { version = "0.14", default-features = false }
 itertools = "0.8"
 
-[features]
-default = ["ncurses-backend"]
-ncurses-backend = ["cursive/ncurses-backend"]
-pancurses-backend = ["cursive/pancurses-backend"]
-termion-backend = ["cursive/termion-backend"]
-blt-backend = ["cursive/blt-backend"]
+[dev-dependencies]
+cursive = "0.14"
 
 [badges.travis-ci]
 repository="hellow554/cursive_hexview"
