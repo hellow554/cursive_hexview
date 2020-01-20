@@ -1,5 +1,12 @@
-#![deny(missing_docs, missing_copy_implementations, trivial_casts, trivial_numeric_casts, unsafe_code,
-        unused_import_braces, unused_qualifications)]
+#![deny(
+    missing_docs,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unsafe_code,
+    unused_import_braces,
+    unused_qualifications
+)]
 
 //! A simple `HexView` for [cursive](https://crates.io/crates/cursive).
 //!
@@ -27,12 +34,12 @@ extern crate itertools;
 use std::borrow::Borrow;
 use std::cmp::min;
 
-use cursive::{Printer, With};
-use cursive::theme::{ColorStyle, Effect};
 use cursive::direction::Direction;
 use cursive::event::{Event, EventResult, Key, MouseEvent};
-use cursive::view::View;
+use cursive::theme::{ColorStyle, Effect};
 use cursive::vec::Vec2;
+use cursive::view::View;
+use cursive::{Printer, With};
 use itertools::Itertools;
 
 /// Controls the possible interactions with a [HexView].
@@ -276,15 +283,13 @@ fn get_cursor_offset(vec: Vec2) -> Vec2 {
     (
         ((vec.x as f32 / CHARS_PER_GROUP as f32).floor() as usize) * CHARS_PER_SPACING,
         0,
-    ).into()
+    )
+        .into()
 }
 
 /// returns the number of elements in `row` for a given `datalen` with `elements_per_line`
 fn get_elements_in_row(datalen: usize, row: usize, elements_per_line: usize) -> usize {
-    min(
-        datalen.saturating_sub(elements_per_line * row),
-        elements_per_line,
-    )
+    min(datalen.saturating_sub(elements_per_line * row), elements_per_line)
 }
 
 /// returns the maximal cursor position in a `row` for a `datalen` and `elements_per_line`
@@ -309,7 +314,7 @@ impl HexView {
     /// E.g. we need 2 digits for 20 elements (0x14), but only 1 for 10 elements (0xA)
     fn get_addr_digit_length(&self) -> usize {
         match self.data.len() {
-            0...1 => 1,
+            0..=1 => 1,
             e => (e as f64).log(16.0).ceil() as usize,
         }
     }
@@ -380,16 +385,13 @@ impl HexView {
         res.y = min(self.get_widget_height() - 1, pos.y);
         res.x = res.x.saturating_sub(hex_offset);
         res.x = res.x.saturating_sub(get_cursor_offset(res).x);
-        res.x = min(
-            get_max_x_in_row(self.data.len(), res.y, U8S_PER_LINE),
-            res.x,
-        );
+        res.x = min(get_max_x_in_row(self.data.len(), res.y, U8S_PER_LINE), res.x);
 
         res
     }
 
     /// returns the displayed characters per field
-    #[allow(unknown_lints, needless_pass_by_value)]
+    #[allow(unknown_lints, clippy::needless_pass_by_value)]
     fn get_field_length(&self, field: Field) -> usize {
         match field {
             Field::Addr => self.get_addr_digit_length(),
@@ -427,7 +429,8 @@ impl HexView {
     /// draws the hex fields between the addr and ascii representation
     fn draw_hex(&self, printer: &Printer) {
         for (i, c) in self.data.chunks(U8S_PER_LINE).enumerate() {
-            let hex = c.chunks(2)
+            let hex = c
+                .chunks(2)
                 .map(|c| {
                     if c.len() == 2 {
                         format!("{:02X}{:02X}", c[0], c[1])
@@ -490,11 +493,13 @@ impl View for HexView {
         match event {
             //view keys
             Event::Key(k) => match k {
-                Key::Left => if self.cursor.x == 0 {
-                    return EventResult::Ignored;
-                } else {
-                    self.cursor.x = self.cursor.x.saturating_sub(1)
-                },
+                Key::Left => {
+                    if self.cursor.x == 0 {
+                        return EventResult::Ignored;
+                    } else {
+                        self.cursor.x = self.cursor.x.saturating_sub(1)
+                    }
+                }
                 Key::Right => {
                     return self.cursor_x_advance();
                 }
@@ -511,10 +516,7 @@ impl View for HexView {
                     } else {
                         let max_pos = min(self.data.len(), self.cursor.y / 2 + 16).saturating_sub(1);
                         self.cursor.y = min(self.cursor.y + 1, max_pos);
-                        self.cursor.x = min(
-                            self.cursor.x,
-                            self.get_elements_in_current_row().saturating_sub(1) * 2,
-                        );
+                        self.cursor.x = min(self.cursor.x, self.get_elements_in_current_row().saturating_sub(1) * 2);
                     }
                 }
                 Key::Home => self.cursor.x = 0,
@@ -528,7 +530,8 @@ impl View for HexView {
                 self.cursor = (
                     get_max_x_in_row(self.data.len(), self.get_widget_height() - 1, 16),
                     self.get_widget_height() - 1,
-                ).into()
+                )
+                    .into()
             }
 
             //edit keys
@@ -588,8 +591,10 @@ impl View for HexView {
     }
 
     fn required_size(&mut self, _: Vec2) -> Vec2 {
-        let length = self.get_field_length(Field::Addr) + self.get_field_length(Field::AddrSep)
-            + self.get_field_length(Field::Hex) + self.get_field_length(Field::AsciiSep)
+        let length = self.get_field_length(Field::Addr)
+            + self.get_field_length(Field::AddrSep)
+            + self.get_field_length(Field::Hex)
+            + self.get_field_length(Field::AsciiSep)
             + self.get_field_length(Field::Ascii);
 
         (length, self.get_widget_height()).into()
@@ -602,10 +607,7 @@ impl View for HexView {
         let addr_sep = (addr.0 + addr.1, self.get_field_length(Field::AddrSep));
         let hex = (addr_sep.0 + addr_sep.1, self.get_field_length(Field::Hex));
         let ascii_sep = (hex.0 + hex.1, self.get_field_length(Field::AsciiSep));
-        let ascii = (
-            ascii_sep.0 + ascii_sep.1,
-            self.get_field_length(Field::Ascii),
-        );
+        let ascii = (ascii_sep.0 + ascii_sep.1, self.get_field_length(Field::Ascii));
 
         self.draw_addr(&printer.offset((addr.0, 0)).cropped((addr.1, height)));
         self.draw_addr_hex_sep(&printer.offset((addr_sep.0, 0)).cropped((addr_sep.1, height)));
