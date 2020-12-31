@@ -2,11 +2,10 @@ extern crate cursive;
 extern crate cursive_hexview;
 
 use cursive::views::{Dialog, DummyView, LinearLayout, TextView};
-use cursive::Cursive;
 use cursive_hexview::{DisplayState, HexView};
 
 fn main() {
-    let mut cur = Cursive::default();
+    let mut cur = cursive::default();
     let explanation = TextView::new("Use the keys + - ↑ ↓ ← → 0-9 a-f for the HexView.\nUse q to exit.");
     let view = HexView::new().display_state(DisplayState::Editable);
 

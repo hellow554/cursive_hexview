@@ -2,7 +2,6 @@ extern crate cursive;
 extern crate cursive_hexview;
 
 use cursive::views::{Dialog, DummyView, LinearLayout, TextView};
-use cursive::Cursive;
 use cursive_hexview::{DisplayState, HexView};
 use std::env;
 use std::fs::File;
@@ -22,7 +21,7 @@ fn main() {
         .expect("Please provide the file to read from as first argument");
     let path = Path::new(&arg);
 
-    let mut cur = Cursive::default();
+    let mut cur = cursive::default();
     let explanation = TextView::new("Use the keys ↑ ↓ ← → to navigate around.\nUse q to exit.");
     let view = HexView::new_from_iter(read_file(path).expect("Cannot read file")).display_state(DisplayState::Enabled);
 
