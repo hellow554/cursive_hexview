@@ -41,6 +41,7 @@ use cursive::vec::Vec2;
 use cursive::view::View;
 use cursive::{Printer, With};
 use itertools::Itertools;
+use std::fmt::Write;
 
 /// Controls the possible interactions with a [HexView].
 ///
@@ -57,6 +58,50 @@ pub enum DisplayState {
     Enabled,
     /// The view can be focused and edited
     Editable,
+}
+
+///Controls the visual output of the `HexView` struct.
+///
+///There are various options which can be altered. For a detailed description of them, please see the fields below.
+///For the changes to apply, you need to use [`set_config`].
+///
+///[`set_config`]: struct.HexView.html#method.set_config
+#[derive(Debug, Clone, Copy)]
+pub struct HexViewConfig {
+    /// Controls the number of bytes per line.
+    ///
+    /// It needs to be greater than 0 and equal or higher than the `bytes_per_group` value.
+    /// Default is 16.
+    pub bytes_per_line: usize,
+    /// Controls the number of bytes per group.
+    ///
+    /// It needs to be greater than 0 equal or lower than `bytes_per_line`.
+    /// Default is 1.
+    pub bytes_per_group: usize,
+    /// Controls the separator between the hex groups in the data output.
+    ///
+    /// Default is ` ` (0x20)
+    pub byte_group_separator: &'static str,
+    /// Controls the separator between the address label and the hex output of the data.
+    ///
+    /// Default is ` : `
+    pub addr_hex_separator: &'static str,
+    ///Controls the separator between the hex output and the ASCII representation of the data.
+    ///
+    /// Default is ` | `
+    pub hex_ascii_separator: &'static str,
+}
+
+impl Default for HexViewConfig {
+    fn default() -> HexViewConfig {
+        HexViewConfig {
+            bytes_per_line: 16,
+            bytes_per_group: 1,
+            byte_group_separator: " ",
+            addr_hex_separator: ": ",
+            hex_ascii_separator: " | ",
+        }
+    }
 }
 
 /// Hexadecimal viewer.
@@ -89,6 +134,7 @@ pub struct HexView {
     cursor: Vec2,
     data: Vec<u8>,
     state: DisplayState,
+    config: HexViewConfig,
 }
 
 impl Default for HexView {
@@ -140,7 +186,31 @@ impl HexView {
             cursor: Vec2::zero(),
             data: data.into_iter().map(|u| *u.borrow()).collect(),
             state: DisplayState::Disabled,
+            config: HexViewConfig::default(),
         }
+    }
+
+    /// This function allows the customization of the `HexView` output.
+    ///
+    /// For options and explanation of every possible option, see the `HexViewConfig` struct.
+    ///
+    /// #Examples
+    ///
+    /// ```
+    /// # use cursive_hexview::{HexView,HexViewConfig};
+    /// let view = HexView::new();
+    /// view.set_config(HexViewConfig {
+    ///     bytes_per_line: 8,
+    ///     ..Default::default()
+    /// });
+    ///```
+    pub fn set_config(&mut self, config: HexViewConfig) {
+        self.config = config;
+    }
+
+    /// [set_config](#method.set_config)
+    pub fn config(self, config: HexViewConfig) -> Self {
+        self.with(|s| s.set_config(config))
     }
 
     /// Returns a reference to the internal data.
@@ -270,18 +340,10 @@ enum Field {
     Ascii,
 }
 
-//TODO: Maybe make them configurable anyhow. Ideas?!
-const U8S_PER_LINE: usize = 16;
-const NIBBLES_PER_LINE: usize = U8S_PER_LINE * 2;
-const CHARS_PER_GROUP: usize = 4;
-const CHARS_PER_SPACING: usize = 1;
-const ADDR_HEX_SEPERATOR: &str = ": ";
-const HEX_ASCII_SEPERATOR: &str = " │ ";
-
 /// calcs the position in a line with spacing
-fn get_cursor_offset(vec: Vec2) -> Vec2 {
+fn get_cursor_offset(vec: Vec2, config: &HexViewConfig) -> Vec2 {
     (
-        ((vec.x as f32 / CHARS_PER_GROUP as f32).floor() as usize) * CHARS_PER_SPACING,
+        ((vec.x as f32 / (2 * config.bytes_per_group) as f32).floor() as usize) * config.byte_group_separator.len(),
         0,
     )
         .into()
@@ -323,7 +385,7 @@ impl HexView {
     fn get_widget_height(&self) -> usize {
         match self.data.len() {
             0 => 1,
-            e => (e as f64 / 16.0).ceil() as usize,
+            e => (e as f64 / self.config.bytes_per_line as f64).ceil() as usize,
         }
     }
 
@@ -332,17 +394,17 @@ impl HexView {
     /// e.g. cursor (5, 0) will result in (6, 0) because of the 1 space spacing after the fourth char
     /// and cursor (9, 0) will result in (11, 0) because of the 1+1 spacing after the fourth and eighth char
     fn get_cursor_offset(&self) -> Vec2 {
-        self.cursor + get_cursor_offset(self.cursor)
+        self.cursor + get_cursor_offset(self.cursor, &self.config)
     }
 
     /// gets the amount of nibbles in the current row
     fn get_elements_in_current_row(&self) -> usize {
-        get_elements_in_row(self.data.len(), self.cursor.y, U8S_PER_LINE)
+        get_elements_in_row(self.data.len(), self.cursor.y, self.config.bytes_per_line)
     }
 
     /// gets the max cursor-x position in the current row
     fn get_max_x_in_current_row(&self) -> usize {
-        get_max_x_in_row(self.data.len(), self.cursor.y, U8S_PER_LINE)
+        get_max_x_in_row(self.data.len(), self.cursor.y, self.config.bytes_per_line)
     }
 
     /// advances the x position by one
@@ -366,7 +428,7 @@ impl HexView {
     ///
     /// Returns none if the cursor is out of range.
     fn get_element_under_cursor(&self) -> Option<u8> {
-        let elem = self.cursor.y * U8S_PER_LINE + self.cursor.x / 2;
+        let elem = self.cursor.y * self.config.bytes_per_line + self.cursor.x / 2;
         if let Some(d) = self.data.get(elem) {
             Some(*d)
         } else {
@@ -384,8 +446,11 @@ impl HexView {
 
         res.y = min(self.get_widget_height() - 1, pos.y);
         res.x = res.x.saturating_sub(hex_offset);
-        res.x = res.x.saturating_sub(get_cursor_offset(res).x);
-        res.x = min(get_max_x_in_row(self.data.len(), res.y, U8S_PER_LINE), res.x);
+        res.x = res.x.saturating_sub(get_cursor_offset(res, &self.config).x);
+        res.x = min(
+            get_max_x_in_row(self.data.len(), res.y, self.config.bytes_per_line),
+            res.x,
+        );
 
         res
     }
@@ -395,10 +460,14 @@ impl HexView {
     fn get_field_length(&self, field: Field) -> usize {
         match field {
             Field::Addr => self.get_addr_digit_length(),
-            Field::AddrSep => ADDR_HEX_SEPERATOR.len(),
-            Field::Hex => (CHARS_PER_GROUP + CHARS_PER_SPACING) * U8S_PER_LINE / 2,
-            Field::AsciiSep => HEX_ASCII_SEPERATOR.len(),
-            Field::Ascii => NIBBLES_PER_LINE,
+            Field::AddrSep => self.config.addr_hex_separator.len(),
+            Field::Hex => {
+                (((2 * self.config.bytes_per_group) + self.config.byte_group_separator.len())
+                    * (self.config.bytes_per_line / self.config.bytes_per_group))
+                    - self.config.byte_group_separator.len()
+            }
+            Field::AsciiSep => self.config.hex_ascii_separator.len(),
+            Field::Ascii => self.config.bytes_per_line * 2,
         }
     }
 }
@@ -417,40 +486,40 @@ impl HexView {
         for lines in 0..self.get_widget_height() {
             printer.print(
                 (0, lines),
-                &format!("{:0len$X}", lines * U8S_PER_LINE, len = digits_len),
+                &format!("{:0len$X}", lines * self.config.bytes_per_line, len = digits_len),
             );
         }
     }
 
     fn draw_addr_hex_sep(&self, printer: &Printer) {
-        printer.print_vline((0, 0), self.get_widget_height(), ADDR_HEX_SEPERATOR);
+        printer.print_vline((0, 0), self.get_widget_height(), &self.config.addr_hex_separator);
     }
 
     /// draws the hex fields between the addr and ascii representation
     fn draw_hex(&self, printer: &Printer) {
-        for (i, c) in self.data.chunks(U8S_PER_LINE).enumerate() {
+        for (i, c) in self.data.chunks(self.config.bytes_per_line).enumerate() {
             let hex = c
-                .chunks(2)
+                .chunks(self.config.bytes_per_group)
                 .map(|c| {
-                    if c.len() == 2 {
-                        format!("{:02X}{:02X}", c[0], c[1])
-                    } else {
-                        format!("{:02X}", c[0])
+                    let mut s = String::new();
+                    for &b in c {
+                        write!(&mut s, "{:02X}", b).expect("Unable to write hex values");
                     }
+                    s.to_string()
                 })
-                .format(" ");
+                .format(self.config.byte_group_separator);
             printer.print((0, i), &format!("{}", hex));
         }
     }
 
     /// draws the ascii seperator between the hex and ascii representation
     fn draw_ascii_sep(&self, printer: &Printer) {
-        printer.print_vline((0, 0), self.get_widget_height(), HEX_ASCII_SEPERATOR);
+        printer.print_vline((0, 0), self.get_widget_height(), &self.config.hex_ascii_separator);
     }
 
     /// draws the ascii chars
     fn draw_ascii(&self, printer: &Printer) {
-        for (i, c) in self.data.chunks(16).enumerate() {
+        for (i, c) in self.data.chunks(self.config.bytes_per_line).enumerate() {
             let ascii: String = c.iter().map(make_printable).collect();
             printer.print((0, i), &ascii);
         }
@@ -553,7 +622,7 @@ impl View for HexView {
                         if let Some(val) = c.to_digit(16) {
                             if let Some(dat) = self.get_element_under_cursor() {
                                 let realpos = self.cursor;
-                                let elem = realpos.y * 16 + realpos.x / 2;
+                                let elem = realpos.y * self.config.bytes_per_line + realpos.x / 2;
                                 let high = self.cursor.x % 2 == 0;
                                 let mask = 0xF << if high { 4 } else { 0 };
 
