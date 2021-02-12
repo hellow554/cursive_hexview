@@ -1,7 +1,7 @@
 Cursive-Hexview
 ===============
 
-[![Build Status](https://travis-ci.org/hellow554/cursive_hexview.svg?branch=master)](https://travis-ci.org/hellow554/cursive_hexview)
+[![BuildStatus](https://github.com/hellow554/cursive_hexview/workflows/Rust/badge.svg)](https://github.com/hellow554/cursive_hexview/actions)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 A simple and basic hexviewer which can be used with [cursive][0].
