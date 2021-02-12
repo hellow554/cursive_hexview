@@ -19,7 +19,7 @@ Just put this into your `Cargo.toml`
 
 ```toml
 [dependencies]
-cursive_hexview = "0.3"
+cursive_hexview = "0.6"
 ```
 
 and this in your rust code.

@@ -1,6 +1,6 @@
 [package]
 name = "cursive_hexview"
-version = "0.2.0"
+version = "0.6.0"
 authors = ["Marcel Hellwig <git@cookiesoft.de>"]
 description = "A simple hexviewer for cursive"
 repository = "https://github.com/hellow554/cursive_hexview.git"
