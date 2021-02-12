@@ -13,7 +13,6 @@ cursive = { version = "0.16", default-features = false }
 itertools = "0.10"
 
 [dev-dependencies]
-cursive = "0.16"
 
 [badges.travis-ci]
 repository="hellow554/cursive_hexview"
