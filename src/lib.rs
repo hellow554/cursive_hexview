@@ -122,7 +122,7 @@ impl Default for HexViewConfig {
 ///
 /// fn main() {
 ///     let view = HexView::new().display_state(DisplayState::Editable);
-///     let mut cur = cursive::Cursive::dummy();
+///     let mut cur = cursive::dummy();
 ///
 ///     cur.add_layer(cursive::views::Dialog::around(view).title("HexView"));
 ///
@@ -198,7 +198,7 @@ impl HexView {
     ///
     /// ```
     /// # use cursive_hexview::{HexView,HexViewConfig};
-    /// let view = HexView::new();
+    /// let mut view = HexView::new();
     /// view.set_config(HexViewConfig {
     ///     bytes_per_line: 8,
     ///     ..Default::default()
