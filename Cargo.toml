@@ -10,7 +10,7 @@ license = "MIT"
 
 [dependencies]
 cursive = { version = "0.16", default-features = false }
-itertools = "0.8"
+itertools = "0.10"
 
 [dev-dependencies]
 cursive = "0.16"
