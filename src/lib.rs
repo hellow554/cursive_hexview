@@ -237,7 +237,7 @@ impl HexView {
     ///
     /// ```
     /// # use cursive_hexview::HexView;
-    /// let mut view = cursive_hexview::HexView::new();
+    /// let mut view = HexView::new();
     /// view.set_data(b"Hello, World!".to_owned().iter());
     /// ```
     pub fn set_data<B: Borrow<u8>, I: IntoIterator<Item = B>>(&mut self, data: I) {
