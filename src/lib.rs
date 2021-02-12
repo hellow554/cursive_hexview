@@ -90,6 +90,10 @@ pub struct HexViewConfig {
     ///
     /// Default is ` | `
     pub hex_ascii_separator: &'static str,
+    /// Controls if the ASCII representation of the data should be shown.
+    ///
+    /// Default is `true`
+    pub show_ascii: bool,
 }
 
 impl Default for HexViewConfig {
@@ -100,6 +104,7 @@ impl Default for HexViewConfig {
             byte_group_separator: " ",
             addr_hex_separator: ": ",
             hex_ascii_separator: " | ",
+            show_ascii: true,
         }
     }
 }
@@ -676,12 +681,16 @@ impl View for HexView {
         self.draw_addr(&printer.offset((addr.0, 0)).cropped((addr.1, height)));
         self.draw_addr_hex_sep(&printer.offset((addr_sep.0, 0)).cropped((addr_sep.1, height)));
         self.draw_hex(&printer.offset((hex.0, 0)).cropped((hex.1, height)));
-        self.draw_ascii_sep(&printer.offset((ascii_sep.0, 0)).cropped((ascii_sep.1, height)));
-        self.draw_ascii(&printer.offset((ascii.0, 0)).cropped((ascii.1, height)));
+        if self.config.show_ascii {
+            self.draw_ascii_sep(&printer.offset((ascii_sep.0, 0)).cropped((ascii_sep.1, height)));
+            self.draw_ascii(&printer.offset((ascii.0, 0)).cropped((ascii.1, height)));
+        }
 
         if self.state != DisplayState::Disabled {
             self.highlight_current_hex(&printer.offset((hex.0, 0)).cropped((hex.1, height)).focused(true));
-            self.highlight_current_ascii(&printer.offset((ascii.0, 0)).cropped((ascii.1, height)).focused(true));
+            if self.config.show_ascii {
+                self.highlight_current_ascii(&printer.offset((ascii.0, 0)).cropped((ascii.1, height)).focused(true));
+            }
         }
     }
 
