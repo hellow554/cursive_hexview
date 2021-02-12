@@ -60,23 +60,23 @@ pub enum DisplayState {
     Editable,
 }
 
-///Controls the visual output of the `HexView` struct.
+/// Controls the visual output of the `HexView` struct.
 ///
-///There are various options which can be altered. For a detailed description of them, please see the fields below.
-///For the changes to apply, you need to use [`set_config`].
+/// There are various options which can be altered. For a detailed description of them, please see the fields below.
+/// For the changes to apply, you need to use [`set_config`].
 ///
-///[`set_config`]: struct.HexView.html#method.set_config
+/// [`set_config`]: struct.HexView.html#method.set_config
 #[derive(Debug, Clone, Copy)]
 pub struct HexViewConfig {
     /// Controls the number of bytes per line.
     ///
     /// It needs to be greater than 0 and equal or higher than the `bytes_per_group` value.
-    /// Default is 16.
+    /// Default is `16`
     pub bytes_per_line: usize,
     /// Controls the number of bytes per group.
     ///
     /// It needs to be greater than 0 equal or lower than `bytes_per_line`.
-    /// Default is 1.
+    /// Default is `1`
     pub bytes_per_group: usize,
     /// Controls the separator between the hex groups in the data output.
     ///
@@ -86,7 +86,7 @@ pub struct HexViewConfig {
     ///
     /// Default is ` : `
     pub addr_hex_separator: &'static str,
-    ///Controls the separator between the hex output and the ASCII representation of the data.
+    /// Controls the separator between the hex output and the ASCII representation of the data.
     ///
     /// Default is ` | `
     pub hex_ascii_separator: &'static str,
@@ -129,7 +129,6 @@ impl Default for HexViewConfig {
 ///     // cur.run();
 /// }
 /// ```
-///
 pub struct HexView {
     cursor: Vec2,
     data: Vec<u8>,
@@ -203,7 +202,7 @@ impl HexView {
     ///     bytes_per_line: 8,
     ///     ..Default::default()
     /// });
-    ///```
+    /// ```
     pub fn set_config(&mut self, config: HexViewConfig) {
         self.config = config;
     }
@@ -223,7 +222,6 @@ impl HexView {
     /// let view = HexView::new_from_iter(data.clone());
     /// assert_eq!(view.data(), &data);
     /// ```
-    ///
     pub fn data(&self) -> &Vec<u8> {
         &self.data
     }
@@ -279,7 +277,6 @@ impl HexView {
     /// let view = HexView::new_from_iter(vec![0, 1, 2, 3]);
     /// assert_eq!(4, view.len());
     /// ```
-    ///
     pub fn len(&self) -> usize {
         self.data.len()
     }
@@ -299,7 +296,6 @@ impl HexView {
     /// let view = HexView::new_from_iter(b"ABC");
     /// assert!(!view.is_empty());
     /// ```
-    ///
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
@@ -319,7 +315,6 @@ impl HexView {
     /// assert_eq!(view.len(), 3);
     /// assert_eq!(view.data(), &vec![0u8, 0u8, 0u8]);
     /// ```
-    ///
     pub fn set_len(&mut self, length: usize) {
         if self.data.len() != length {
             let oldlen = self.data.len();
