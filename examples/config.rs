@@ -27,6 +27,7 @@ fn main() {
         bytes_per_line: 8,
         bytes_per_group: 4,
         byte_group_separator: "     ",
+        show_ascii: false,
         ..Default::default()
     };
     view3.set_config(config2);
