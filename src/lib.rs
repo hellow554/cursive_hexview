@@ -505,7 +505,7 @@ impl HexView {
                     for &b in c {
                         write!(&mut s, "{:02X}", b).expect("Unable to write hex values");
                     }
-                    s.to_string()
+                    s
                 })
                 .format(self.config.byte_group_separator);
             printer.print((0, i), &format!("{}", hex));
