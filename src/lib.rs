@@ -38,7 +38,7 @@ use cursive::direction::Direction;
 use cursive::event::{Event, EventResult, Key, MouseEvent};
 use cursive::theme::{ColorStyle, Effect};
 use cursive::vec::Vec2;
-use cursive::view::View;
+use cursive::view::{CannotFocus, View};
 use cursive::{Printer, With};
 use itertools::Itertools;
 use std::fmt::Write;
@@ -694,8 +694,10 @@ impl View for HexView {
         }
     }
 
-    fn take_focus(&mut self, _: Direction) -> bool {
-        self.state != DisplayState::Disabled
+    fn take_focus(&mut self, _: Direction) -> Result<EventResult, CannotFocus> {
+        (self.state != DisplayState::Disabled)
+            .then(EventResult::consumed)
+            .ok_or(CannotFocus)
     }
 }
 
