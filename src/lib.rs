@@ -213,6 +213,7 @@ impl HexView {
     }
 
     /// [set_config](#method.set_config)
+    #[must_use]
     pub fn config(self, config: HexViewConfig) -> Self {
         self.with(|s| s.set_config(config))
     }
@@ -245,6 +246,7 @@ impl HexView {
     }
 
     /// [set_display_state](#method.set_display_state)
+    #[must_use]
     pub fn display_state(self, state: DisplayState) -> Self {
         self.with(|s| s.set_display_state(state))
     }
@@ -429,11 +431,7 @@ impl HexView {
     /// Returns none if the cursor is out of range.
     fn get_element_under_cursor(&self) -> Option<u8> {
         let elem = self.cursor.y * self.config.bytes_per_line + self.cursor.x / 2;
-        if let Some(d) = self.data.get(elem) {
-            Some(*d)
-        } else {
-            None
-        }
+        self.data.get(elem).copied()
     }
 
     /// Converts the visual position to a non spaced one.
@@ -492,7 +490,7 @@ impl HexView {
     }
 
     fn draw_addr_hex_sep(&self, printer: &Printer) {
-        printer.print_vline((0, 0), self.get_widget_height(), &self.config.addr_hex_separator);
+        printer.print_vline((0, 0), self.get_widget_height(), self.config.addr_hex_separator);
     }
 
     /// draws the hex fields between the addr and ascii representation
@@ -514,7 +512,7 @@ impl HexView {
 
     /// draws the ascii seperator between the hex and ascii representation
     fn draw_ascii_sep(&self, printer: &Printer) {
-        printer.print_vline((0, 0), self.get_widget_height(), &self.config.hex_ascii_separator);
+        printer.print_vline((0, 0), self.get_widget_height(), self.config.hex_ascii_separator);
     }
 
     /// draws the ascii chars
@@ -638,19 +636,14 @@ impl View for HexView {
             Event::Mouse {
                 offset,
                 position,
-                event,
-            } => match event {
-                MouseEvent::Press(_) => {
-                    if let Some(position) = position.checked_sub(offset) {
-                        self.cursor = self.convert_visual_to_real_cursor(position);
-                    } else {
-                        return EventResult::Ignored;
-                    }
-                }
-                _ => {
+                event: MouseEvent::Press(_),
+            } => {
+                if let Some(position) = position.checked_sub(offset) {
+                    self.cursor = self.convert_visual_to_real_cursor(position);
+                } else {
                     return EventResult::Ignored;
                 }
-            },
+            }
             _ => {
                 return EventResult::Ignored;
             }
