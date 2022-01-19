@@ -1,11 +1,13 @@
 #![deny(
-    missing_docs,
     missing_copy_implementations,
     trivial_casts,
     trivial_numeric_casts,
     unsafe_code,
     unused_import_braces,
-    unused_qualifications
+    unused_qualifications,
+    missing_docs,
+    rustdoc::missing_crate_level_docs,
+    rustdoc::invalid_html_tags
 )]
 
 //! A simple `HexView` for [cursive](https://crates.io/crates/cursive).
@@ -43,7 +45,7 @@ use cursive::{Printer, With};
 use itertools::Itertools;
 use std::fmt::Write;
 
-/// Controls the possible interactions with a [HexView].
+/// Controls the possible interactions with a [`HexView`].
 ///
 /// This enum is used for the [`set_display_state`] method
 /// and controls the interaction inside of the cursive environment.
@@ -97,8 +99,8 @@ pub struct HexViewConfig {
 }
 
 impl Default for HexViewConfig {
-    fn default() -> HexViewConfig {
-        HexViewConfig {
+    fn default() -> Self {
+        Self {
             bytes_per_line: 16,
             bytes_per_group: 1,
             byte_group_separator: " ",
@@ -144,7 +146,7 @@ pub struct HexView {
 impl Default for HexView {
     /// Creates a new, default `HexView` with an empty databuffer and disabled state.
     fn default() -> Self {
-        HexView::new()
+        Self::new()
     }
 }
 
@@ -157,6 +159,7 @@ impl HexView {
     /// # use cursive_hexview::HexView;
     /// let view = HexView::new();
     /// ```
+    #[must_use]
     pub fn new() -> Self {
         Self::new_from_iter(Vec::<u8>::new())
     }
@@ -186,7 +189,7 @@ impl HexView {
     /// let view = HexView::new_from_iter(&[5, 6, 2, 89]);
     /// ```
     pub fn new_from_iter<B: Borrow<u8>, I: IntoIterator<Item = B>>(data: I) -> Self {
-        HexView {
+        Self {
             cursor: Vec2::zero(),
             data: data.into_iter().map(|u| *u.borrow()).collect(),
             state: DisplayState::Disabled,
@@ -212,7 +215,7 @@ impl HexView {
         self.config = config;
     }
 
-    /// [set_config](#method.set_config)
+    /// [`set_config`](#method.set_config)
     #[must_use]
     pub fn config(self, config: HexViewConfig) -> Self {
         self.with(|s| s.set_config(config))
@@ -225,11 +228,12 @@ impl HexView {
     /// ```
     /// # use cursive_hexview::HexView;
     /// let data = vec![3, 4, 9, 1];
-    /// let view = HexView::new_from_iter(data.clone());
+    /// let view = HexView::new_from_iter(&data);
     /// assert_eq!(view.data(), &data);
     /// ```
-    pub fn data(&self) -> &Vec<u8> {
-        &self.data
+    #[must_use]
+    pub fn data(&self) -> &[u8] {
+        self.data.as_slice()
     }
 
     /// Sets the data during the lifetime of this instance.
@@ -245,7 +249,7 @@ impl HexView {
         self.data = data.into_iter().map(|u| *u.borrow()).collect();
     }
 
-    /// [set_display_state](#method.set_display_state)
+    /// [`set_display_state`](#method.set_display_state)
     #[must_use]
     pub fn display_state(self, state: DisplayState) -> Self {
         self.with(|s| s.set_display_state(state))
@@ -262,7 +266,7 @@ impl HexView {
     /// # Note
     ///
     /// This has nothing to do with rusts type system, which means even when this instance is set to
-    /// `Disabled` you still can alter the data through [set_data](#method.set_data) but you cannot
+    /// `Disabled` you still can alter the data through [`set_data`](#method.set_data) but you cannot
     /// alter it with the keyboard commands (<kbd>+</kbd>, <kbd>-</kbd>, <kbd>#hexvalue</kbd>).
     ///
     /// # Examples
@@ -284,6 +288,7 @@ impl HexView {
     /// let view = HexView::new_from_iter(vec![0, 1, 2, 3]);
     /// assert_eq!(4, view.len());
     /// ```
+    #[must_use]
     pub fn len(&self) -> usize {
         self.data.len()
     }
@@ -303,6 +308,7 @@ impl HexView {
     /// let view = HexView::new_from_iter(b"ABC");
     /// assert!(!view.is_empty());
     /// ```
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
@@ -417,9 +423,9 @@ impl HexView {
         let max_pos = self.get_max_x_in_current_row();
         if self.cursor.x == max_pos {
             return EventResult::Ignored;
-        } else {
-            self.cursor.x = min(self.cursor.x + 1, max_pos);
         }
+
+        self.cursor.x = min(self.cursor.x + 1, max_pos);
         EventResult::Consumed(None)
     }
 
@@ -524,6 +530,7 @@ impl HexView {
     }
 
     /// this highlights the complete hex byte under the cursor
+    #[allow(clippy::similar_names)]
     fn highlight_current_hex(&self, printer: &Printer) {
         if let Some(elem) = self.get_element_under_cursor() {
             let high = self.cursor.x % 2 == 0;
@@ -536,7 +543,7 @@ impl HexView {
 
             printer.with_color(ColorStyle::highlight(), |p| p.print(hpos, ext(high)));
             printer.with_color(ColorStyle::secondary(), |p| {
-                p.with_effect(Effect::Reverse, |p| p.print(dpos, ext(!high)))
+                p.with_effect(Effect::Reverse, |p| p.print(dpos, ext(!high)));
             });
         }
     }
@@ -563,9 +570,9 @@ impl View for HexView {
                 Key::Left => {
                     if self.cursor.x == 0 {
                         return EventResult::Ignored;
-                    } else {
-                        self.cursor.x = self.cursor.x.saturating_sub(1)
                     }
+
+                    self.cursor.x = self.cursor.x.saturating_sub(1);
                 }
                 Key::Right => {
                     return self.cursor_x_advance();
@@ -573,18 +580,18 @@ impl View for HexView {
                 Key::Up => {
                     if self.cursor.y == 0 {
                         return EventResult::Ignored;
-                    } else {
-                        self.cursor.y = self.cursor.y.saturating_sub(1)
                     }
+
+                    self.cursor.y = self.cursor.y.saturating_sub(1);
                 }
                 Key::Down => {
                     if self.cursor.y == self.get_widget_height().saturating_sub(1) {
                         return EventResult::Ignored;
-                    } else {
-                        let max_pos = min(self.data.len(), self.cursor.y / 2 + 16).saturating_sub(1);
-                        self.cursor.y = min(self.cursor.y + 1, max_pos);
-                        self.cursor.x = min(self.cursor.x, self.get_elements_in_current_row().saturating_sub(1) * 2);
                     }
+
+                    let max_pos = min(self.data.len(), self.cursor.y / 2 + 16).saturating_sub(1);
+                    self.cursor.y = min(self.cursor.y + 1, max_pos);
+                    self.cursor.x = min(self.cursor.x, self.get_elements_in_current_row().saturating_sub(1) * 2);
                 }
                 Key::Home => self.cursor.x = 0,
                 Key::End => self.cursor.x = self.get_max_x_in_current_row(),
@@ -598,7 +605,7 @@ impl View for HexView {
                     get_max_x_in_row(self.data.len(), self.get_widget_height() - 1, 16),
                     self.get_widget_height() - 1,
                 )
-                    .into()
+                    .into();
             }
 
             //edit keys
