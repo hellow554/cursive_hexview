@@ -96,6 +96,14 @@ pub struct HexViewConfig {
     ///
     /// Default is `true`
     pub show_ascii: bool,
+    /// Controls the address of the first byte
+    ///
+    /// Default is 0
+    pub start_addr: usize,
+    /// Controls number of bytes used for displaying address.
+    /// When 0, the value is computed automatically.
+    /// Default is 0
+    pub bytes_per_addr: usize,
 }
 
 impl Default for HexViewConfig {
@@ -107,6 +115,8 @@ impl Default for HexViewConfig {
             addr_hex_separator: ": ",
             hex_ascii_separator: " | ",
             show_ascii: true,
+            start_addr: 0,
+            bytes_per_addr: 0
         }
     }
 }
@@ -249,6 +259,12 @@ impl HexView {
         self.data = data.into_iter().map(|u| *u.borrow()).collect();
     }
 
+
+    /// Modifies start_addr value of instance config during the lifetime.
+    pub fn set_start_addr(&mut self, addr: usize) {
+        self.config.start_addr = addr;
+    }
+
     /// [`set_display_state`](#method.set_display_state)
     #[must_use]
     pub fn display_state(self, state: DisplayState) -> Self {
@@ -385,7 +401,7 @@ impl HexView {
     fn get_addr_digit_length(&self) -> usize {
         match self.data.len() {
             0..=1 => 1,
-            e => (e as f64).log(16.0).ceil() as usize,
+            e => std::cmp::max(((e + self.config.start_addr) as f64).log(16.0).ceil() as usize, self.config.bytes_per_addr),
         }
     }
 
@@ -490,7 +506,7 @@ impl HexView {
         for lines in 0..self.get_widget_height() {
             printer.print(
                 (0, lines),
-                &format!("{:0len$X}", lines * self.config.bytes_per_line, len = digits_len),
+                &format!("{:0len$X}", self.config.start_addr + lines * self.config.bytes_per_line, len = digits_len),
             );
         }
     }
