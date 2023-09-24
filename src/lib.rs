@@ -280,7 +280,7 @@ impl HexView {
     /// You have a read access to the current config.
     /// In order to modify them, use [`config_mut`].
     #[must_use]
-    pub fn config(&self) -> &HexViewConfig {
+    pub const fn config(&self) -> &HexViewConfig {
         &self.config
     }
 
@@ -378,6 +378,7 @@ impl HexView {
     }
 }
 
+#[derive(Clone, Copy)]
 enum Field {
     Addr,
     AddrSep,
@@ -501,7 +502,6 @@ impl HexView {
     }
 
     /// returns the displayed characters per field
-    #[allow(unknown_lints, clippy::needless_pass_by_value)]
     fn get_field_length(&self, field: Field) -> usize {
         match field {
             Field::Addr => self.get_addr_digit_length(),
@@ -557,7 +557,7 @@ impl HexView {
                     s
                 })
                 .format(self.config.byte_group_separator);
-            printer.print((0, i), &format!("{}", hex));
+            printer.print((0, i), &format!("{hex}"));
         }
     }
 
@@ -575,14 +575,13 @@ impl HexView {
     }
 
     /// this highlights the complete hex byte under the cursor
-    #[allow(clippy::similar_names)]
     fn highlight_current_hex(&self, printer: &Printer) {
         if let Some(elem) = self.get_element_under_cursor() {
             let high = self.cursor.x % 2 == 0;
             let hpos = self.get_cursor_offset();
             let dpos = hpos.map_x(|x| if high { x + 1 } else { x - 1 });
 
-            let fem = format!("{:02X}", elem);
+            let fem = format!("{elem:02X}");
             let s = fem.split_at(1);
             let ext = |hl| if hl { s.0 } else { s.1 };
 
@@ -597,7 +596,7 @@ impl HexView {
     fn highlight_current_ascii(&self, printer: &Printer) {
         if let Some(elem) = self.get_element_under_cursor() {
             let pos = self.cursor.map_x(|x| x / 2);
-            let ascii = make_printable(&elem);
+            let ascii = make_printable(elem);
             printer.with_color(ColorStyle::highlight(), |p| p.print(pos, &ascii.to_string()));
         }
     }
