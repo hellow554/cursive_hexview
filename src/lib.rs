@@ -1,13 +1,13 @@
 #![deny(
     missing_copy_implementations,
+    missing_debug_implementations,
     trivial_casts,
     trivial_numeric_casts,
     unsafe_code,
     unused_import_braces,
     unused_qualifications,
     missing_docs,
-    rustdoc::missing_crate_level_docs,
-    rustdoc::invalid_html_tags
+    rustdoc::all
 )]
 
 //! A simple `HexView` for [cursive](https://crates.io/crates/cursive).
@@ -43,7 +43,7 @@ use cursive::vec::Vec2;
 use cursive::view::{CannotFocus, View};
 use cursive::{Printer, With};
 use itertools::Itertools;
-use std::fmt::Write;
+use std::fmt::{self, Write};
 
 /// Controls the possible interactions with a [`HexView`].
 ///
@@ -147,16 +147,26 @@ impl Default for HexViewConfig {
 /// }
 /// ```
 pub struct HexView {
-    cursor: Vec2,
     data: Vec<u8>,
-    state: DisplayState,
     config: HexViewConfig,
+    cursor: Vec2,
+    state: DisplayState,
 }
 
 impl Default for HexView {
     /// Creates a new, default `HexView` with an empty databuffer and disabled state.
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl fmt::Debug for HexView {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("HexView")
+            .field("config", &self.config)
+            .field("cursor", &self.cursor)
+            .field("state", &self.state)
+            .finish_non_exhaustive()
     }
 }
 
