@@ -18,7 +18,7 @@ fn main() {
         ..Default::default()
     };
     let view2 = HexView::new_from_iter(data)
-        .config(config)
+        .with_config(config)
         .display_state(DisplayState::Editable);
 
     //A view with several config changes, non chainable version

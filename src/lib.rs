@@ -227,7 +227,7 @@ impl HexView {
 
     /// [`set_config`](#method.set_config)
     #[must_use]
-    pub fn config(self, config: HexViewConfig) -> Self {
+    pub fn with_config(self, config: HexViewConfig) -> Self {
         self.with(|s| s.set_config(config))
     }
 
@@ -259,15 +259,28 @@ impl HexView {
         self.data = data.into_iter().map(|u| *u.borrow()).collect();
     }
 
-    /// Modifies start_addr value of instance config during the lifetime.
-    pub fn set_start_addr(&mut self, addr: usize) {
-        self.config.start_addr = addr;
-    }
-
     /// [`set_display_state`](#method.set_display_state)
     #[must_use]
     pub fn display_state(self, state: DisplayState) -> Self {
         self.with(|s| s.set_display_state(state))
+    }
+
+    /// Returns the currenct config for this view
+    ///
+    /// You have a read access to the current config.
+    /// In order to modify them, use [`config_mut`].
+    #[must_use]
+    pub fn config(&self) -> &HexViewConfig {
+        &self.config
+    }
+
+    /// Returns the current config for this view.
+    ///
+    /// You can modify and update all values of that config. To make those
+    /// changes visible, you must redraw this view.
+    #[must_use]
+    pub fn config_mut(&mut self) -> &mut HexViewConfig {
+        &mut self.config
     }
 
     /// Sets the state of the view to one of the variants from `DisplayState`.
