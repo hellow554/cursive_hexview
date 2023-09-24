@@ -86,7 +86,7 @@ pub struct HexViewConfig {
     pub byte_group_separator: &'static str,
     /// Controls the separator between the address label and the hex output of the data.
     ///
-    /// Default is ` : `
+    /// Default is `: `
     pub addr_hex_separator: &'static str,
     /// Controls the separator between the hex output and the ASCII representation of the data.
     ///
