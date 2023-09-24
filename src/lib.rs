@@ -116,7 +116,7 @@ impl Default for HexViewConfig {
             hex_ascii_separator: " | ",
             show_ascii: true,
             start_addr: 0,
-            bytes_per_addr: 0
+            bytes_per_addr: 0,
         }
     }
 }
@@ -259,7 +259,6 @@ impl HexView {
         self.data = data.into_iter().map(|u| *u.borrow()).collect();
     }
 
-
     /// Modifies start_addr value of instance config during the lifetime.
     pub fn set_start_addr(&mut self, addr: usize) {
         self.config.start_addr = addr;
@@ -401,7 +400,10 @@ impl HexView {
     fn get_addr_digit_length(&self) -> usize {
         match self.data.len() {
             0..=1 => 1,
-            e => std::cmp::max(((e + self.config.start_addr) as f64).log(16.0).ceil() as usize, self.config.bytes_per_addr),
+            e => std::cmp::max(
+                ((e + self.config.start_addr) as f64).log(16.0).ceil() as usize,
+                self.config.bytes_per_addr,
+            ),
         }
     }
 
@@ -506,7 +508,11 @@ impl HexView {
         for lines in 0..self.get_widget_height() {
             printer.print(
                 (0, lines),
-                &format!("{:0len$X}", self.config.start_addr + lines * self.config.bytes_per_line, len = digits_len),
+                &format!(
+                    "{:0len$X}",
+                    self.config.start_addr + lines * self.config.bytes_per_line,
+                    len = digits_len
+                ),
             );
         }
     }
