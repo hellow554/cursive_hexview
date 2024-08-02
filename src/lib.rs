@@ -30,7 +30,7 @@
 //! | <kbd>-</kbd>                        | Decrease the amount of data by one. Any data that will leave the viewable area, will be permanantly lost.                                                                                                                                              |
 //! | <kbd>0-9</kbd>, <kbd>a-f</kbd>      | Set the nibble under the cursor to the corresponding hex value. Note, that this is only available in the editable state, see [`DisplayState`](enum.DisplayState.html#Editable) and [`set_display_state`](struct.HexView.html#method.set_display_state) |
 
-extern crate cursive;
+extern crate cursive_core as cursive;
 extern crate itertools;
 
 use std::borrow::Borrow;

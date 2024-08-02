@@ -9,10 +9,11 @@ keywords = ["cursive", "hexview"]
 license = "MIT"
 
 [dependencies]
-cursive = { version = "0.20", default-features = false }
+cursive_core = { version = "0.4" }
 itertools = "0.11"
 
 [dev-dependencies]
+cursive = "0.21"
 
 [badges.travis-ci]
 repository="hellow554/cursive_hexview"
